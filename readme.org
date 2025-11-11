@@ -1,0 +1,8 @@
+Experimentverkstad för en potentiell webbskrapare för att samla in information vi kan använda till korpusbygge och även potentiellt i framtiden för att samla in myndighetsdata.
+
+Att göra
+- Respektera robots.txt
+- Implementera en riktigt queue
+- Kör med parallelprocessing så det inte tar så lång tid. 
+- Kommuner lägger upp mycket PDF:er, finns det något vi skulle kunna göra med dom?
+- Bygg in språkidentifiering, initellt kanske på en mer övergripande nivå som finska/meänkieli, Jiddisch, Romska men i framtiden även kanske metodiker för att särskilja på meänkieli och finska och olika dialekter av romani
