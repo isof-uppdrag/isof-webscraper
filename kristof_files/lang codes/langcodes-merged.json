@@ -1,0 +1,747 @@
+[
+    {
+        "name": "Afrikaans",
+        "code-iso": "afr",
+        "code-fasttext": "af"
+    },
+    {
+        "name": "Amharic",
+        "code-iso": "amh",
+        "code-fasttext": "am"
+    },
+    {
+        "name": "Arabic",
+        "code-iso": "ara",
+        "code-fasttext": "ar"
+    },
+    {
+        "name": "Aragonese",
+        "code-iso": "arg",
+        "code-fasttext": "an"
+    },
+    {
+        "name": "Egyptian Arabic",
+        "code-iso": "arz",
+        "code-fasttext": "arz"
+    },
+    {
+        "name": "Assamese",
+        "code-iso": "asm",
+        "code-fasttext": "as"
+    },
+    {
+        "name": "Asturian",
+        "code-iso": "ast",
+        "code-fasttext": "ast"
+    },
+    {
+        "name": "Avaric",
+        "code-iso": "ava",
+        "code-fasttext": "av"
+    },
+    {
+        "name": "South Azerbaijani",
+        "code-iso": "azb",
+        "code-fasttext": "azb"
+    },
+    {
+        "name": "Azerbaijani",
+        "code-iso": "aze",
+        "code-fasttext": "az"
+    },
+    {
+        "name": "Bashkir",
+        "code-iso": "bak",
+        "code-fasttext": "ba"
+    },
+    {
+        "name": "Bavarian",
+        "code-iso": "bar",
+        "code-fasttext": "bar"
+    },
+    {
+        "name": "Belarusian",
+        "code-iso": "bel",
+        "code-fasttext": "be"
+    },
+    {
+        "name": "Bengali",
+        "code-iso": "ben",
+        "code-fasttext": "bn"
+    },
+    {
+        "name": "Tibetan",
+        "code-iso": "bod",
+        "code-fasttext": "bo"
+    },
+    {
+        "name": "Bosnian",
+        "code-iso": "bos",
+        "code-fasttext": "bs"
+    },
+    {
+        "name": "Breton",
+        "code-iso": "bre",
+        "code-fasttext": "br"
+    },
+    {
+        "name": "Bulgarian",
+        "code-iso": "bul",
+        "code-fasttext": "bg"
+    },
+    {
+        "name": "Catalan",
+        "code-iso": "cat",
+        "code-fasttext": "ca"
+    },
+    {
+        "name": "Cebuano",
+        "code-iso": "ceb",
+        "code-fasttext": "ceb"
+    },
+    {
+        "name": "Czech",
+        "code-iso": "ces",
+        "code-fasttext": "cs"
+    },
+    {
+        "name": "Chechen",
+        "code-iso": "che",
+        "code-fasttext": "ce"
+    },
+    {
+        "name": "Chuvash",
+        "code-iso": "chv",
+        "code-fasttext": "cv"
+    },
+    {
+        "name": "Central Kurdish",
+        "code-iso": "ckb",
+        "code-fasttext": "ckb"
+    },
+    {
+        "name": "Cornish",
+        "code-iso": "cor",
+        "code-fasttext": "kw"
+    },
+    {
+        "name": "Corsican",
+        "code-iso": "cos",
+        "code-fasttext": "co"
+    },
+    {
+        "name": "Welsh",
+        "code-iso": "cym",
+        "code-fasttext": "cy"
+    },
+    {
+        "name": "Danish",
+        "code-iso": "dan",
+        "code-fasttext": "da"
+    },
+    {
+        "name": "German",
+        "code-iso": "deu",
+        "code-fasttext": "de"
+    },
+    {
+        "name": "Divehi",
+        "code-iso": "div",
+        "code-fasttext": "dv"
+    },
+    {
+        "name": "Lower Sorbian",
+        "code-iso": "dsb",
+        "code-fasttext": "dsb"
+    },
+    {
+        "name": "Emilian",
+        "code-iso": "egl",
+        "code-fasttext": "eml"
+    },
+    {
+        "name": "English",
+        "code-iso": "eng",
+        "code-fasttext": "en"
+    },
+    {
+        "name": "Esperanto",
+        "code-iso": "epo",
+        "code-fasttext": "eo"
+    },
+    {
+        "name": "Estonian",
+        "code-iso": "est",
+        "code-fasttext": "et"
+    },
+    {
+        "name": "Basque",
+        "code-iso": "eus",
+        "code-fasttext": "eu"
+    },
+    {
+        "name": "Persian",
+        "code-iso": "fas",
+        "code-fasttext": "fa"
+    },
+    {
+        "name": "Finnish",
+        "code-iso": "fin",
+        "code-fasttext": "fi"
+    },
+    {
+        "name": "French",
+        "code-iso": "fra",
+        "code-fasttext": "fr"
+    },
+    {
+        "name": "Scottish Gaelic",
+        "code-iso": "gla",
+        "code-fasttext": "gd"
+    },
+    {
+        "name": "Irish",
+        "code-iso": "gle",
+        "code-fasttext": "ga"
+    },
+    {
+        "name": "Galician",
+        "code-iso": "glg",
+        "code-fasttext": "gl"
+    },
+    {
+        "name": "Manx",
+        "code-iso": "glv",
+        "code-fasttext": "gv"
+    },
+    {
+        "name": "Goan Konkani",
+        "code-iso": "gom",
+        "code-fasttext": "gom"
+    },
+    {
+        "name": "Guarani",
+        "code-iso": "grn",
+        "code-fasttext": "gn"
+    },
+    {
+        "name": "Gujarati",
+        "code-iso": "guj",
+        "code-fasttext": "gu"
+    },
+    {
+        "name": "Haitian Creole",
+        "code-iso": "hat",
+        "code-fasttext": "ht"
+    },
+    {
+        "name": "Serbo-Croatian",
+        "code-iso": "hbs",
+        "code-fasttext": "sh"
+    },
+    {
+        "name": "Hebrew",
+        "code-iso": "heb",
+        "code-fasttext": "he"
+    },
+    {
+        "name": "Fiji Hindi",
+        "code-iso": "hif",
+        "code-fasttext": "hif"
+    },
+    {
+        "name": "Hindi",
+        "code-iso": "hin",
+        "code-fasttext": "hi"
+    },
+    {
+        "name": "Croatian",
+        "code-iso": "hrv",
+        "code-fasttext": "hr"
+    },
+    {
+        "name": "Upper Sorbian",
+        "code-iso": "hsb",
+        "code-fasttext": "hsb"
+    },
+    {
+        "name": "Hungarian",
+        "code-iso": "hun",
+        "code-fasttext": "hu"
+    },
+    {
+        "name": "Armenian",
+        "code-iso": "hye",
+        "code-fasttext": "hy"
+    },
+    {
+        "name": "Ido",
+        "code-iso": "ido",
+        "code-fasttext": "io"
+    },
+    {
+        "name": "Interlingue",
+        "code-iso": "ile",
+        "code-fasttext": "ie"
+    },
+    {
+        "name": "Indonesian",
+        "code-iso": "ind",
+        "code-fasttext": "id"
+    },
+    {
+        "name": "Icelandic",
+        "code-iso": "isl",
+        "code-fasttext": "is"
+    },
+    {
+        "name": "Italian",
+        "code-iso": "ita",
+        "code-fasttext": "it"
+    },
+    {
+        "name": "Javanese",
+        "code-iso": "jav",
+        "code-fasttext": "jv"
+    },
+    {
+        "name": "Lojban",
+        "code-iso": "jbo",
+        "code-fasttext": "jbo"
+    },
+    {
+        "name": "Japanese",
+        "code-iso": "jpn",
+        "code-fasttext": "ja"
+    },
+    {
+        "name": "Kannada",
+        "code-iso": "kan",
+        "code-fasttext": "kn"
+    },
+    {
+        "name": "Georgian",
+        "code-iso": "kat",
+        "code-fasttext": "ka"
+    },
+    {
+        "name": "Kazakh",
+        "code-iso": "kaz",
+        "code-fasttext": "kk"
+    },
+    {
+        "name": "Khmer",
+        "code-iso": "khm",
+        "code-fasttext": "km"
+    },
+    {
+        "name": "Kyrgyz",
+        "code-iso": "kir",
+        "code-fasttext": "ky"
+    },
+    {
+        "name": "Komi",
+        "code-iso": "kom",
+        "code-fasttext": "kv"
+    },
+    {
+        "name": "Korean",
+        "code-iso": "kor",
+        "code-fasttext": "ko"
+    },
+    {
+        "name": "Karachay-Balkar",
+        "code-iso": "krc",
+        "code-fasttext": "krc"
+    },
+    {
+        "name": "Kurdish",
+        "code-iso": "kur",
+        "code-fasttext": "ku"
+    },
+    {
+        "name": "Lao",
+        "code-iso": "lao",
+        "code-fasttext": "lo"
+    },
+    {
+        "name": "Latin",
+        "code-iso": "lat",
+        "code-fasttext": "la"
+    },
+    {
+        "name": "Latvian",
+        "code-iso": "lav",
+        "code-fasttext": "lv"
+    },
+    {
+        "name": "Limburgish",
+        "code-iso": "lim",
+        "code-fasttext": "li"
+    },
+    {
+        "name": "Lithuanian",
+        "code-iso": "lit",
+        "code-fasttext": "lt"
+    },
+    {
+        "name": "Lombard",
+        "code-iso": "lmo",
+        "code-fasttext": "lmo"
+    },
+    {
+        "name": "Northern Luri",
+        "code-iso": "lrc",
+        "code-fasttext": "lrc"
+    },
+    {
+        "name": "Luxembourgish",
+        "code-iso": "ltz",
+        "code-fasttext": "lb"
+    },
+    {
+        "name": "Maithili",
+        "code-iso": "mai",
+        "code-fasttext": "mai"
+    },
+    {
+        "name": "Malayalam",
+        "code-iso": "mal",
+        "code-fasttext": "ml"
+    },
+    {
+        "name": "Marathi",
+        "code-iso": "mar",
+        "code-fasttext": "mr"
+    },
+    {
+        "name": "Eastern Mari",
+        "code-iso": "mhr",
+        "code-fasttext": "mhr"
+    },
+    {
+        "name": "Minangkabau",
+        "code-iso": "min",
+        "code-fasttext": "min"
+    },
+    {
+        "name": "Macedonian",
+        "code-iso": "mkd",
+        "code-fasttext": "mk"
+    },
+    {
+        "name": "Malagasy",
+        "code-iso": "mlg",
+        "code-fasttext": "mg"
+    },
+    {
+        "name": "Maltese",
+        "code-iso": "mlt",
+        "code-fasttext": "mt"
+    },
+    {
+        "name": "Mongolian",
+        "code-iso": "mon",
+        "code-fasttext": "mn"
+    },
+    {
+        "name": "Western Mari",
+        "code-iso": "mrj",
+        "code-fasttext": "mrj"
+    },
+    {
+        "name": "Mirandese",
+        "code-iso": "mwl",
+        "code-fasttext": "mwl"
+    },
+    {
+        "name": "Burmese",
+        "code-iso": "mya",
+        "code-fasttext": "my"
+    },
+    {
+        "name": "Erzya",
+        "code-iso": "myv",
+        "code-fasttext": "myv"
+    },
+    {
+        "name": "Mazanderani",
+        "code-iso": "mzn",
+        "code-fasttext": "mzn"
+    },
+    {
+        "name": "Neapolitan",
+        "code-iso": "nap",
+        "code-fasttext": "nap"
+    },
+    {
+        "name": "Low German",
+        "code-iso": "nds",
+        "code-fasttext": "nds"
+    },
+    {
+        "name": "Newari",
+        "code-iso": "new",
+        "code-fasttext": "new"
+    },
+    {
+        "name": "Dutch",
+        "code-iso": "nld",
+        "code-fasttext": "nl"
+    },
+    {
+        "name": "Norwegian Nynorsk",
+        "code-iso": "nno",
+        "code-fasttext": "nn"
+    },
+    {
+        "name": "Norwegian",
+        "code-iso": "nor",
+        "code-fasttext": "no"
+    },
+    {
+        "name": "Odia",
+        "code-iso": "ory",
+        "code-fasttext": "or"
+    },
+    {
+        "name": "Ossetic",
+        "code-iso": "oss",
+        "code-fasttext": "os"
+    },
+    {
+        "name": "Pampanga",
+        "code-iso": "pam",
+        "code-fasttext": "pam"
+    },
+    {
+        "name": "Punjabi",
+        "code-iso": "pan",
+        "code-fasttext": "pa"
+    },
+    {
+        "name": "Polish",
+        "code-iso": "pol",
+        "code-fasttext": "pl"
+    },
+    {
+        "name": "Portuguese",
+        "code-iso": "por",
+        "code-fasttext": "pt"
+    },
+    {
+        "name": "Pashto",
+        "code-iso": "pus",
+        "code-fasttext": "ps"
+    },
+    {
+        "name": "Quechua",
+        "code-iso": "que",
+        "code-fasttext": "qu"
+    },
+    {
+        "name": "Romansh",
+        "code-iso": "roh",
+        "code-fasttext": "rm"
+    },
+    {
+        "name": "Romanian",
+        "code-iso": "ron",
+        "code-fasttext": "ro"
+    },
+    {
+        "name": "Rusyn",
+        "code-iso": "rue",
+        "code-fasttext": "rue"
+    },
+    {
+        "name": "Russian",
+        "code-iso": "rus",
+        "code-fasttext": "ru"
+    },
+    {
+        "name": "Sanskrit",
+        "code-iso": "san",
+        "code-fasttext": "sa"
+    },
+    {
+        "name": "Sicilian",
+        "code-iso": "scn",
+        "code-fasttext": "scn"
+    },
+    {
+        "name": "Scots",
+        "code-iso": "sco",
+        "code-fasttext": "sco"
+    },
+    {
+        "name": "Sinhala",
+        "code-iso": "sin",
+        "code-fasttext": "si"
+    },
+    {
+        "name": "Slovak",
+        "code-iso": "slk",
+        "code-fasttext": "sk"
+    },
+    {
+        "name": "Slovenian",
+        "code-iso": "slv",
+        "code-fasttext": "sl"
+    },
+    {
+        "name": "Sindhi",
+        "code-iso": "snd",
+        "code-fasttext": "sd"
+    },
+    {
+        "name": "Somali",
+        "code-iso": "som",
+        "code-fasttext": "so"
+    },
+    {
+        "name": "Spanish",
+        "code-iso": "spa",
+        "code-fasttext": "es"
+    },
+    {
+        "name": "Albanian",
+        "code-iso": "sqi",
+        "code-fasttext": "sq"
+    },
+    {
+        "name": "Sardinian",
+        "code-iso": "srd",
+        "code-fasttext": "sc"
+    },
+    {
+        "name": "Serbian",
+        "code-iso": "srp",
+        "code-fasttext": "sr"
+    },
+    {
+        "name": "Sundanese",
+        "code-iso": "sun",
+        "code-fasttext": "su"
+    },
+    {
+        "name": "Swedish",
+        "code-iso": "swe",
+        "code-fasttext": "sv"
+    },
+    {
+        "name": "Tamil",
+        "code-iso": "tam",
+        "code-fasttext": "ta"
+    },
+    {
+        "name": "Tatar",
+        "code-iso": "tat",
+        "code-fasttext": "tt"
+    },
+    {
+        "name": "Telugu",
+        "code-iso": "tel",
+        "code-fasttext": "te"
+    },
+    {
+        "name": "Tajik",
+        "code-iso": "tgk",
+        "code-fasttext": "tg"
+    },
+    {
+        "name": "Tagalog",
+        "code-iso": "tgl",
+        "code-fasttext": "tl"
+    },
+    {
+        "name": "Thai",
+        "code-iso": "tha",
+        "code-fasttext": "th"
+    },
+    {
+        "name": "Turkmen",
+        "code-iso": "tuk",
+        "code-fasttext": "tk"
+    },
+    {
+        "name": "Turkish",
+        "code-iso": "tur",
+        "code-fasttext": "tr"
+    },
+    {
+        "name": "Uyghur",
+        "code-iso": "uig",
+        "code-fasttext": "ug"
+    },
+    {
+        "name": "Ukrainian",
+        "code-iso": "ukr",
+        "code-fasttext": "uk"
+    },
+    {
+        "name": "Urdu",
+        "code-iso": "urd",
+        "code-fasttext": "ur"
+    },
+    {
+        "name": "Uzbek",
+        "code-iso": "uzb",
+        "code-fasttext": "uz"
+    },
+    {
+        "name": "Venetian",
+        "code-iso": "vec",
+        "code-fasttext": "vec"
+    },
+    {
+        "name": "Veps",
+        "code-iso": "vep",
+        "code-fasttext": "vep"
+    },
+    {
+        "name": "Vietnamese",
+        "code-iso": "vie",
+        "code-fasttext": "vi"
+    },
+    {
+        "name": "Volapük",
+        "code-iso": "vol",
+        "code-fasttext": "vo"
+    },
+    {
+        "name": "Walloon",
+        "code-iso": "wln",
+        "code-fasttext": "wa"
+    },
+    {
+        "name": "Wu Chinese",
+        "code-iso": "wuu",
+        "code-fasttext": "wuu"
+    },
+    {
+        "name": "Kalmyk",
+        "code-iso": "xal",
+        "code-fasttext": "xal"
+    },
+    {
+        "name": "Mingrelian",
+        "code-iso": "xmf",
+        "code-fasttext": "xmf"
+    },
+    {
+        "name": "Yiddish",
+        "code-iso": "yid",
+        "code-fasttext": "yi"
+    },
+    {
+        "name": "Yoruba",
+        "code-iso": "yor",
+        "code-fasttext": "yo"
+    },
+    {
+        "name": "Chinese",
+        "code-iso": "zho",
+        "code-fasttext": "zh"
+    }
+]
