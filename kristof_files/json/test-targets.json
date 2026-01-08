@@ -1,0 +1,40 @@
+{
+    "kommun": {
+      "source file": "test",
+      "domain": "test",
+      "targets": [
+      {
+        "name": "Kiruna kommun - meänkieli",
+        "url": "https://kiruna.se/kommun--demokrati/vara-minoritetssprak/meankielela.html"
+      },
+      {
+        "name": "Kiruna kommun - finska",
+        "url": "https://kiruna.se/kommun--demokrati/vara-minoritetssprak/suomeksi.html"
+      },
+      {
+        "name": "1177 - Finska",
+        "url": "https://www.1177.se/fi-fi/Stockholm/other-languages/other-languages/"
+      },
+      {
+        "name": "1177 - Meänkieli",
+        "url": "https://www.1177.se/fit/Stockholm/other-languages/other-languages/"
+      },
+      {
+        "name": "Luleå - Finska",
+        "url": "https://www.lulea.se/language/suomeksi-finska.html"
+      },
+      {
+        "name": "Luleå - Meänkieli",
+        "url": "https://www.lulea.se/language/meankielela-meankieli.html"
+      },
+      {
+        "name": "Gällivare - Finska",
+        "url" : "https://gallivare.se/arkiv/languages/suomeksi"
+      },
+      {
+        "name": "Gällivare - Meänkieli",
+        "url": "https://gallivare.se/arkiv/languages/meankieli"
+      }
+    ]
+  }
+}
