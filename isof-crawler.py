@@ -259,7 +259,7 @@ def crawl_one(url, outfile, seed_set, seeds_remaining):
     try:
         r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
         if r.status_code != 200:
-            return
+            return []
     except requests.exceptions.SSLError as ssl_err:
         log(f"SSL error while crawling {url}: {ssl_err}")
         return []

@@ -1,4 +1,9 @@
-#  Readme
+#  Readme (work in progress)
+
+## #TODO:
+- Make sure that data is collected incrementally so when the crawler is run, it adds new texts to the existing collection rather than replacing it?
+- Optimize model used for Fin/Fit disambiguation and check which features are the ones the model is looking at when predicting?
+- Per-paragraph or per-sentence language prediction instead of on the total?
 
 This is a README file with instructions on how to use the crawler. Table of contents:
 #TODO
@@ -41,3 +46,15 @@ The crawler has a number of flags/command line arguments that define the functio
 - `-f`, `--finfit_model`: location of the model used for Finnish/Meänkieli disambiguation
 - `-t`, `--threading`: more efficient scraping with threading implemented
 - `-w`, `--max_workers`: number of workers for threaded crawling (default=4)
+
+### Example command lines
+
+**1. Threaded crawling (4 workers) with model disambiguation**
+```
+python3 isof-crawler.py -f models/fin-fit-disambiguation-model.bin -i json/targets.json -d model -t -w 4
+```
+
+**2. Sequential crawling with rule-based disambiguation**
+```
+python3 isof-crawler.py -i json/targets.json -d rule
+```
