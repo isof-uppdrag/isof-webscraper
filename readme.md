@@ -62,3 +62,5 @@ The crawler has a number of flags/command line arguments that define the functio
 When you start running the program, two files will be saved in the newly created `output`folder:
 1. `scraped-corpus.json`: the file containing all the scraped texts with the corresponding metadata
 2. `crawler.log`: log file storing all the user feedback during the crawling process with timestamps
+
+***To be continued***
