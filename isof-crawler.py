@@ -297,11 +297,11 @@ def main():
     log("Starting crawler")
 
     parser = argparse.ArgumentParser(description="Web crawler")
-    #parser.add_argument("-a", "--fast-model-all", required=True, help="Off-the-shelf Fasttext model")
-    parser.add_argument("-f", "--finfitmodel", help="Trained model for Finnish-Meänkieli disambiguation; Not required in case disambiguation-type = rule")
+    #parser.add_argument("-a", "--fast_model_all", required=True, help="Off-the-shelf Fasttext model")
+    parser.add_argument("-f", "--finfit_model", help="Trained model for Finnish-Meänkieli disambiguation; Not required in case disambiguation-type = rule")
     parser.add_argument("-i", "--input", required=True, help="Input file containing target URLs")
     parser.add_argument(
-        "-d", "--disambiguation-type",
+        "-d", "--disambiguation_type",
         required=True,
         choices=["rule", "model"],
         help="Disambiguation type (rule or model) for Finnish/Meänkieli")
@@ -315,7 +315,7 @@ def main():
     THREADING_ENABLED = args.threading  # True or false
 
     # User feedback for missing argument
-    if args.disambiguation_type == "model" and not args.finfitmodel:
+    if args.disambiguation_type == "model" and not args.finfit_model:
         parser.error("--finfitmodel is required when --disambiguation-type=model")
 
     DISAMBIGUATION_TYPE = args.disambiguation_type
@@ -323,7 +323,7 @@ def main():
     FAST_MODEL_ALL = fasttext.load_model(os.path.join(BASE_DIR, "models", "lid.176.ftz"))
     FAST_MODEL_FINFIT = None
     if DISAMBIGUATION_TYPE == "model":
-        FAST_MODEL_FINFIT = fasttext.load_model(args.finfitmodel)
+        FAST_MODEL_FINFIT = fasttext.load_model(args.finfit_model)
 
     log("Fasttext model(s) loaded")
 
