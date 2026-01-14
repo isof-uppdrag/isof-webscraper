@@ -30,7 +30,7 @@ mkdir -p models && curl -L -o models/lid.176.ftz https://dl.fbaipublicfiles.com/
 
 If you are planning to use a classifier model for Finnish/Meänkieli disambiguation, you can train a Fasttext model by running:
 ```
-python3 disambiguation/model.py
+python3 model.py
 ```
 
 This will save a model called `fin-fit-disambiguation-model` in the `models` folder that you created in the previous step.
