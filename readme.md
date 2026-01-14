@@ -37,7 +37,7 @@ This will save a model called `fin-fit-disambiguation-model` in the `models` fol
 
 The crawler has a number of flags/command line arguments that define the functionality:
 - `-i`, `--input`: location of the input file (JSON) containing the target websites
-- `-d`, `--disambiguation-type`: strategy for Finnish/Meänkieli classification; accepted values are `model` or `rule`; if `model` is selected, then `-f` below needs to be defined
-- `-f`, `--finfit-model`: location of the model used for Finnish/Meänkieli disambiguation
+- `-d`, `--disambiguation_type`: strategy for Finnish/Meänkieli classification; accepted values are `model` or `rule`; if `model` is selected, then `-f` below needs to be defined
+- `-f`, `--finfit_model`: location of the model used for Finnish/Meänkieli disambiguation
 - `-t`, `--threading`: more efficient scraping with threading implemented
 - `-w`, `--max_workers`: number of workers for threaded crawling (default=4)
