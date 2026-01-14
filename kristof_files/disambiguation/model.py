@@ -1,6 +1,8 @@
 import pandas as pd
 import fasttext
 import re
+import os
+
 from pathlib import Path
 from sklearn.metrics import (
     accuracy_score,
@@ -18,7 +20,11 @@ TRAIN_LABEL_COL = "lang"
 TEST_TEXT_COL = "text"
 TEST_LABEL_COL = "lang"
 
+MODEL_DIR = os.path.join(os.path.dirname(__file__), os.pardir, "models")
+os.makedirs(MODEL_DIR, exist_ok=True)
+
 MODEL_NAME = "fin-fit-disambiguation-model.bin"
+MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
 
 # Config
 MIN_TEXT_LEN = 20
@@ -108,8 +114,8 @@ model = fasttext.train_supervised(
     loss=LOSS
 )
 
-model.save_model(MODEL_NAME)
-print(f"Model saved to file {MODEL_NAME}")
+model.save_model(MODEL_PATH)
+print(f"Model saved to file {MODEL_PATH}")
 
 # Prediction function
 def predict_lang(model, text, conf_threshold=0.0):
