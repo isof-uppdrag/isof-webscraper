@@ -312,7 +312,7 @@ def main():
 
     args = parser.parse_args()
 
-    THREADING_ENABLED = args.threads  # True or false
+    THREADING_ENABLED = args.threading  # True or false
 
     # User feedback for missing argument
     if args.disambiguation_type == "model" and not args.fast_model_finfit:
