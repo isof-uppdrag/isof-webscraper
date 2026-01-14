@@ -20,7 +20,7 @@ TRAIN_LABEL_COL = "lang"
 TEST_TEXT_COL = "text"
 TEST_LABEL_COL = "lang"
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), os.pardir, "models")
+MODEL_DIR = os.path.join(os.path.dirname(__file__),"models")
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 MODEL_NAME = "fin-fit-disambiguation-model.bin"
@@ -121,7 +121,7 @@ print(f"Model saved to file {MODEL_PATH}")
 def predict_lang(model, text, conf_threshold=0.0):
     labels, probs = model.predict(text, k=1)
 
-    label = labels[0].replace("__label__", "")  # 🔴 CHANGED
+    label = labels[0].replace("__label__", "")
     prob = float(probs[0])
 
     if prob < conf_threshold:
@@ -144,7 +144,7 @@ preds = []
 probs = []
 
 for text in test_df["text"]:
-    pred, prob = predict_lang(model, text, CONF_THRESHOLD)  # 🔴 CHANGED
+    pred, prob = predict_lang(model, text, CONF_THRESHOLD)
     preds.append(pred)
     probs.append(prob)
 
@@ -196,7 +196,7 @@ print(f"\nSaved {len(errors)} misclassified examples to errors.csv")
 #        f"{'-'*80}"
 #    )
 
-# Clean label output (no __label__)
-examples = ["Stockholmissa on", "Sinä olet", "Jag är inte", "Blablabla"]
-for text in examples:
-    print(text, predict_lang(model, text))
+# Tests
+#examples = ["Sinä olet", "Jag är inte", "Blablabla"]
+#for text in examples:
+#    print(text, predict_lang(model, text))
