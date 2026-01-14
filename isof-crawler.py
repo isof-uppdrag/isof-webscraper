@@ -316,7 +316,7 @@ def main():
 
     # User feedback for missing argument
     if args.disambiguation_type == "model" and not args.fast_model_finfit:
-        parser.error("--fast-model-finfit is required when --disambiguation-type=model")
+        parser.error("--finfit-model is required when --disambiguation-type=model")
 
     DISAMBIGUATION_TYPE = args.disambiguation_type
     #FAST_MODEL_ALL = fasttext.load_model(args.fast_model_all)
