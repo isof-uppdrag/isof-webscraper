@@ -21,7 +21,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 - Optional threaded crawling for more efficient processing
 - Logging to console and a log file
 
-## Usage
+## Getting started
 
 Install all required libraries by running
 ```
@@ -59,8 +59,32 @@ The crawler has a number of flags/command line arguments that define the functio
     python3 isof-crawler.py -i json/targets.json -d rule
     ```
 
-When you start running the program, two files will be saved in the newly created `output`folder:
+When you start running the program, two files will be saved in the newly created `output` folder:
 1. `scraped-corpus.json`: the file containing all the scraped texts with the corresponding metadata
 2. `crawler.log`: log file storing all the user feedback during the crawling process with timestamps
+
+## Process flow
+
+1. The crawler starts going through the seed URL's from the input file and saves internal child links from each website.
+2. Metadata and texts are written to the output JSON file. The language prediction is stored in the metadata variable `final_prediction`
+3. The scraped texts also get passed through a pre-trained language identification model (Fasttext) for an initial language prediction. The model has support for 176 languages but does not include minority languages such as Meänkieli, Romani or Sami. To mitigate that, the following procedure is applied:
+    - If the predicted language is Finnish (`fin`), the text is checked by either a rule-based algorithm (`-d rule`) or a model trained specifically for Finnish/Meänkieli disambiguation (`-d model`). Since Meänkieli texts are most likely to be predicted as Finnish by the first model, this is an extra step to ensure that we separate the actual Finnish/Meänkieli texts from each other.
+    - In case the `lang` tag in the scraped website's HTML code is an instance of `{"rmf", "rmn", "rmy", "rmu", "rom"}`, then `final_prediction` is overwritten to the ISO 639-3 code `rom`.
+    - In case the `lang` tag in the scraped website's HTML codde is an instance of `{"smi", "smj", "sma", "sme", "se"}` or if the URL in question includes the string `samegi` (short for *samegiella*), then `final_prediction` is overwritten to the ISO 639-3 code `smi`.
+
+## Output
+
+The scraped texts are stored in a JSON file in the `output` folder with the following metadata:
+
+- `uid`: a (hashed) unique identifer for the text
+- `url`: the URL from which the text was scraped
+- `category`: type of website (e.g. kommun/region/myndighet)
+- `lang-url-tag`: the language tag from the website's HTML code
+- `length`: length of the text in number of characters
+- `lang-fasttext-identified`: ISO 639-3 code predicted with the off-the-shelf model (not necessarily the final language tag)
+- `lang-fasttext-confidence`: prediction confidence of the off-the-shelf model [0-1]
+- `final_prediction`: the final language tag in ISO 639-3 format
+- `classification_type`: information about how the final prediction was done (e.g. *Fasttext off-the-shelf/Rule-based/Fasttext trained disambiguator model/HTML overwrite*)
+
 
 ***To be continued***
