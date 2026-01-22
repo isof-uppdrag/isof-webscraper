@@ -6,6 +6,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 ### 2. [Getting started](#getting-started)
 ### 3. [Process flow](#process-flow)
 ### 4. [Output](#output)
+### 5. [Additional resources](#additional-resources)
 
 ## Features
 
@@ -96,3 +97,7 @@ The scraped texts are stored in a JSON file in the `output` folder with the foll
     ### Parsing the output
 
     Using the file `output-parser.py`, you can parse the scraped corpus and create sub-corpora for various languages specifically.
+
+## Additional resources
+
+In the folder *additional resources*, you can find a json file including all the unique `lang` tags that were found in the HTML code of the target websites. This can be useful for further langtech tasks.
