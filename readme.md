@@ -7,7 +7,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 ### 3. [Process flow](#process-flow)
 ### 4. [Output](#output)
 
-## 1. Features
+## Features
 
 - Crawl a fixed set of target websites stored in an input file (JSON)
 - Respect access rules defined in `robots.txt` of each website
@@ -20,7 +20,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 - Optional threaded crawling for more efficient processing
 - Logging to console and a log file
 
-## 2. Getting started
+## Getting started
 
 Install all required libraries by running
 ```
