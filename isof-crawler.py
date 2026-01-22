@@ -6,6 +6,7 @@ import os
 import fasttext
 import argparse
 import threading
+import re
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
@@ -13,6 +14,7 @@ from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 from collections import deque
 from datetime import datetime, timezone
+from collections import Counter
 
 from langclassifier import fin_fit_disambiguation
 
@@ -47,9 +49,8 @@ def log(msg):
 # Global variables
 #############
 
-#
 start_urls = []  # Starting point
-urlcat_lookup = {}  # Metadata for type of URL (kommun/region/myndighet)
+urlcat_lookup = {}  # Metadata for type of URL (kommun/region/myndighet/radio)
 allowed_domains = set()  # Making sure that only child links within the seed page are explored (no escpaing)
 robots_cache = {}  # For robots.txt
 
@@ -59,7 +60,11 @@ lang_counts = {}
 
 visited = set()
 
-state_lock = threading.Lock()
+state_lock = threading.Lock()  # Only one thread is allowed to change shared memory at a time
+file_lock = threading.Lock()  # Only one thread is allowed to write to output file at a time
+
+seeds_done = set()
+seeds_processed = False
 
 #############
 # Helper functions
@@ -71,6 +76,45 @@ def fasttext_predict(model, text):
     '''
     label, prob = model.predict(text, k=1)
     return label[0].replace("__label__", ""), prob.item()
+
+def split_sentences(text):
+    '''
+    Split input text into sentences using regex
+    '''
+    return re.split(r'(?<=[.!?])\s+', text)  # Naive sentence split, potentially can be replaced with something more sophisticated like NLTK
+
+def predict_language_sentence_level(text, model):
+    '''
+    Predict language of a whole text/document on the sentence level. 
+    Returns a final, aggregated prediction based on majority vote,
+    the average confidence for the final prediction, and a dictionary of sentence counts per language.
+    '''
+    sentences = split_sentences(text)
+
+    predictions = []
+    confidences = []
+
+    for sent in sentences:
+        if len(sent.strip()) < 10:
+            continue  # Skip very short sentences (fewer than 10 chars)
+
+        try:
+            lang, conf = fasttext_predict(model, sent)
+            iso_lang = to_iso3(lang)
+            predictions.append(iso_lang)
+            confidences.append(conf)
+        except Exception:
+            continue
+
+    if not predictions:
+        return "unknown", 0.0, {}  # Failsafe
+    
+    counts = Counter(predictions)
+    final_lang = counts.most_common(1)[0][0]  # Majority vote
+    avg_conf = sum(confidences)/len(confidences)
+
+    return final_lang, avg_conf, dict(counts)
+
 
 def to_iso3(lang_code):
     '''
@@ -123,13 +167,57 @@ def make_unique_id(category, url):
     parsed = urlparse(url)
     base = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
     raw = f"{category}|{base}".lower().strip()
+
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
 def clean_text(soup):
+    '''
+    Cleans texts from noisy/redundant data.
+    '''
     for tag in soup(["nav", "header", "footer", "script", "style", "img"]):
         tag.decompose()
     text = soup.get_text(separator=" ", strip=True)
+
     return " ".join(text.split())
+
+def extract_publish_date(soup):
+    '''
+    Attempts to extract publish date for metadata.
+    '''
+
+    # Common meta tags for publish date extraction from HTML, possible to add new ones in the list if necessary
+    meta_properties = [
+        ("property", "article:published_time"),
+        ("property", "article:published"),
+        ("property", "og:published_time"),
+        ("name", "datePublished"),
+        ("name", "pubdate"),
+        ("name", "dc.date"),
+        ("name", "DC.date"),
+        ("name", "publish-date"),
+        ("name", "publish_date"),
+        ("name", "created")
+    ]
+
+    # Looking for pubdate tags
+    for attribute, value in meta_properties:
+        tag = soup.find("meta", attrs={attribute: value})
+        if tag and tag.get("content"):
+            try:
+                dt = datetime.fromisoformat(tag["content"].replace("Z", "+00:00"))
+                return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat()
+            except Exception:
+                pass
+
+    # Check if tag contains time formatted data
+    time_tag = soup.find("time", datetime=True)
+    if time_tag:
+        try:
+            dt = datetime.fromisoformat(time_tag["datetime"].replace("Z", "+00:00"))
+            return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat()
+        except Exception:
+            pass
+    return None  # Failsafe (if no tags were found)
 
 #############
 # Page parser
@@ -137,6 +225,8 @@ def clean_text(soup):
 
 def parse_page(html, url):
     soup = BeautifulSoup(html, "html.parser")
+
+    published = extract_publish_date(soup)  # Extract publish date 
 
     # Extracting lang code from HTML code
     html_tag = soup.find("html")
@@ -152,10 +242,14 @@ def parse_page(html, url):
     length = len(text)
 
     try:
-        # Run off-the-shelf Fasttext model language prediction on scraped text
-        fast_lang, conf = fasttext_predict(FAST_MODEL_ALL, text)
+        if LANG_PREDICTION_LEVEL == "text":
+            fast_lang, conf = fasttext_predict(FAST_MODEL_ALL, text)
+            sentence_stats = None
+        else: 
+            fast_lang, conf, sentence_stats = predict_language_sentence_level(text=text, model=FAST_MODEL_ALL)
     except Exception:
         fast_lang, conf = "unknown", 0.0
+        sentence_stats = None
 
     final_prediction = to_iso3(fast_lang)  # Make sure that the 639-3 format is used
     classification_type = "Fasttext off-the-shelf"  # Classification_type is used as metadata in the output
@@ -216,6 +310,7 @@ def parse_page(html, url):
 
         log(f"Languages seen so far: {sorted(unique_lang_tags)}")
         log(f"Counts per language: {lang_counts}")
+        print()
 
     # Metadata
     timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -238,10 +333,13 @@ def parse_page(html, url):
         "length": length,
         "lang-fasttext-identified": to_iso3(fast_lang),
         "lang-fasttext-confidence": conf,
-        "classification_type": classification_type,
         **rule_features,
+        "lang_prediction_level": LANG_PREDICTION_LEVEL,
+        "sentence_lang_distribution": sentence_stats,
         "final_prediction": final_prediction,
-        "date": timestamp,
+        "classification_type": classification_type,
+        "crawl_timestamp": timestamp,
+        "published": published,
         "title": title,
         "text": text
     }, links
@@ -271,15 +369,17 @@ def crawl_one(url, outfile, seed_set, seeds_remaining):
 
     page_data, child_links = parse_page(r.text, url)
 
-    with state_lock:
-        json.dump(page_data, outfile, ensure_ascii=False, indent=4)
+    with file_lock:
+        json.dump(page_data, outfile, ensure_ascii=False)
         outfile.write("\n")
+        outfile.flush()
 
-        if THREADING_ENABLED and url in seeds_remaining:
-            seeds_remaining.remove(url)
-            if not seeds_remaining and not seeds_processed:
+    if url in seed_set:
+        with state_lock:
+            seeds_done.add(url)
+            if not seeds_processed and seeds_done == seed_set:
                 seeds_processed = True
-                log("*** All seed URLs processed; now crawling child links ***")
+                log("*** All seed URLs processed, now crawling child links ***")
 
     time.sleep(0.2)
 
@@ -293,11 +393,13 @@ def main():
     global FAST_MODEL_ALL, FAST_MODEL_FINFIT
     global DISAMBIGUATION_TYPE, fasttext_to_iso3
     global THREADING_ENABLED, seeds_processed
+    global LANG_PREDICTION_LEVEL    
 
     log("Starting crawler")
 
     parser = argparse.ArgumentParser(description="Web crawler")
     #parser.add_argument("-a", "--fast_model_all", required=True, help="Off-the-shelf Fasttext model")
+    parser.add_argument("-l", "--lang_level", help="Level of language prediction: doc (document) or sent (sentence)", choices=["doc", "sent"], default="doc")
     parser.add_argument("-f", "--finfit_model", help="Trained model for Finnish-Meänkieli disambiguation; Not required in case disambiguation-type = rule")
     parser.add_argument("-i", "--input", required=True, help="Input file containing target URLs")
     parser.add_argument(
@@ -320,6 +422,7 @@ def main():
 
     DISAMBIGUATION_TYPE = args.disambiguation_type
     #FAST_MODEL_ALL = fasttext.load_model(args.fast_model_all)
+    LANG_PREDICTION_LEVEL = args.lang_level
     FAST_MODEL_ALL = fasttext.load_model(os.path.join(BASE_DIR, "models", "lid.176.ftz"))
     FAST_MODEL_FINFIT = None
     if DISAMBIGUATION_TYPE == "model":

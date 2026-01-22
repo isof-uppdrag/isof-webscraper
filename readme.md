@@ -1,14 +1,13 @@
-#  Readme (work in progress)
-
-## #TODO:
-- Make sure that data is collected incrementally so when the crawler is run, it adds new texts to the existing collection rather than replacing it?
-- Optimize model used for Fin/Fit disambiguation and check which features are the ones the model is looking at when predicting? Select final rule-based method?
-- Per-paragraph or per-sentence language prediction instead of on the total?
+#  Readme
 
 This is a README file with instructions on how to use the crawler. Table of contents:
-#TODO
 
-## Features
+### 1. [Features](#features)
+### 2. [Getting started](#getting-started)
+### 3. [Process flow](#process-flow)
+### 4. [Output](#output)
+
+## 1. Features
 
 - Crawl a fixed set of target websites stored in an input file (JSON) #TODO: add required structure of the file?
 - Respect access rules defined in `robots.txt` of each website
@@ -21,7 +20,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 - Optional threaded crawling for more efficient processing
 - Logging to console and a log file
 
-## Getting started
+## 2. Getting started
 
 Install all required libraries by running
 ```
@@ -78,13 +77,21 @@ The scraped texts are stored in a JSON file in the `output` folder with the foll
 
 - `uid`: a (hashed) unique identifer for the text
 - `url`: the URL from which the text was scraped
-- `category`: type of website (e.g. kommun/region/myndighet)
+- `category`: type of website (e.g. kommun/region/myndighet/radio) -- in the current implementation the only website with the *radio* tag is *https://www.sverigesradio.se/meanraatio*
 - `lang-url-tag`: the language tag from the website's HTML code
 - `length`: length of the text in number of characters
 - `lang-fasttext-identified`: ISO 639-3 code predicted with the off-the-shelf model (not necessarily the final language tag)
 - `lang-fasttext-confidence`: prediction confidence of the off-the-shelf model [0-1]
+- A set of frequencies of various features used for rule-based Finnish/Meänkieli disambiguation (e.g. relative frequency of letter *d* and *h*, counts of Meänkieli-specific lexical items etc.) NB: only gets populated when `--disambiguation_type` is set to `rule`, otherwise `null` is written to all features. For more information about rules and for changing these, see `langclassifier.py` - the script from which the rule-based function is imported in the crawler.
+- `lang_prediction_level`: the level at which the language prediction was done (document/sentence)
+- `sentence_lang_distribution`: the distribution of the identified languages on the sentence level for the whole document (text)
 - `final_prediction`: the final language tag in ISO 639-3 format
 - `classification_type`: information about how the final prediction was done (e.g. *Fasttext off-the-shelf/Rule-based/Fasttext trained disambiguator model/HTML overwrite*)
+- `crawl_timestamp`: the timestamp at which the crawler exported the text
+- `published`: the publication date of the text (*null* when not available)
+- `title`: the title of the scraped text
+- `text`: the actual text
 
+    ### Parsing the output
 
-***To be continued***
+    Using the file `XXX.py`, you can parse the scraped corpus and create sub-corpora for various languages specifically.

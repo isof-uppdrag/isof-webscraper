@@ -1,4 +1,13 @@
 {
+    "radio": {
+      "domain": "radio",
+      "targets": [
+        {
+          "radio": "MEANRAATIO",
+          "url": "https://www.sverigesradio.se/meanraatio"
+        }
+      ]
+    },
     "kommun": {
       "source file": "kommuner.json",
       "domain": "kommun",
