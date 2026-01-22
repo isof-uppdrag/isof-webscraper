@@ -41,6 +41,7 @@ This will save a model called `fin-fit-disambiguation-model` in the `models` fol
 
 The crawler has a number of flags/command line arguments that define the functionality:
 - `-i`, `--input`: location of the input file (JSON) containing the target websites
+- `-l`, `--lang_level`: level at which language prediction should be done (choices:["doc", "sent"]) -- doc = whole document (text), sent = sentence
 - `-d`, `--disambiguation_type`: strategy for Finnish/Meänkieli classification; accepted values are `model` or `rule`; if `model` is selected, then `-f` below needs to be defined
 - `-f`, `--finfit_model`: location of the model used for Finnish/Meänkieli disambiguation
 - `-t`, `--threading`: more efficient scraping with threading implemented
@@ -48,14 +49,14 @@ The crawler has a number of flags/command line arguments that define the functio
 
     ### Example command lines
 
-    **1. Threaded crawling (4 workers) with model disambiguation**
+    **1. Threaded crawling (4 workers) with model disambiguation and document level language prediction**
     ```
-    python3 isof-crawler.py -f models/fin-fit-disambiguation-model.bin -i json/targets.json -d model -t -w 4
+    python3 isof-crawler.py -f models/fin-fit-disambiguation-model.bin -i json/targets.json -d model -t -w 4 -l doc
     ```
 
-    **2. Sequential crawling with rule-based disambiguation**
+    **2. Sequential crawling with rule-based disambiguation and sentence level language prediction**
     ```
-    python3 isof-crawler.py -i json/targets.json -d rule
+    python3 isof-crawler.py -i json/targets.json -d rule -l sent
     ```
 
 When you start running the program, two files will be saved in the newly created `output` folder:

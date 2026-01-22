@@ -242,11 +242,16 @@ def parse_page(html, url):
     length = len(text)
 
     try:
-        if LANG_PREDICTION_LEVEL == "text":
+        # Language prediction on the document level (whole text)
+        if LANG_PREDICTION_LEVEL == "doc":
             fast_lang, conf = fasttext_predict(FAST_MODEL_ALL, text)
             sentence_stats = None
+        
+        # Language prediction on the sentence level
         else: 
             fast_lang, conf, sentence_stats = predict_language_sentence_level(text=text, model=FAST_MODEL_ALL)
+
+    # Failsafe
     except Exception:
         fast_lang, conf = "unknown", 0.0
         sentence_stats = None
@@ -398,7 +403,6 @@ def main():
     log("Starting crawler")
 
     parser = argparse.ArgumentParser(description="Web crawler")
-    #parser.add_argument("-a", "--fast_model_all", required=True, help="Off-the-shelf Fasttext model")
     parser.add_argument("-l", "--lang_level", help="Level of language prediction: doc (document) or sent (sentence)", choices=["doc", "sent"], default="doc")
     parser.add_argument("-f", "--finfit_model", help="Trained model for Finnish-Meänkieli disambiguation; Not required in case disambiguation-type = rule")
     parser.add_argument("-i", "--input", required=True, help="Input file containing target URLs")
@@ -488,8 +492,8 @@ def main():
                         urlcat_lookup[link] = urlcat_lookup.get(url)
                         queue.append(link)
 
-                log(f"Queue length: {len(queue)}")
-                log("")
+                #log(f"Queue length: {len(queue)}")
+                #log("")
 
         # With threading
         else:
