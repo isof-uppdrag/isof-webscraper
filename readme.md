@@ -9,7 +9,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 
 ## 1. Features
 
-- Crawl a fixed set of target websites stored in an input file (JSON) #TODO: add required structure of the file?
+- Crawl a fixed set of target websites stored in an input file (JSON)
 - Respect access rules defined in `robots.txt` of each website
 - Language detection of scraped texts with:
     1. an off-the-shelf Fasttext model with support for 176 languages (source/more information: https://fasttext.cc/docs/en/language-identification.html)
@@ -94,4 +94,4 @@ The scraped texts are stored in a JSON file in the `output` folder with the foll
 
     ### Parsing the output
 
-    Using the file `XXX.py`, you can parse the scraped corpus and create sub-corpora for various languages specifically.
+    Using the file `output-parser.py`, you can parse the scraped corpus and create sub-corpora for various languages specifically.
