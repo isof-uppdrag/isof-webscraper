@@ -114,7 +114,7 @@ Features not currently used by the classifier but could be interesting for futur
 - `count_d`: the number of times the letter *d* occurs in the text
 - `rel_freq_d`: relative frequency of the letter *d* in the text
 - `count_h`: the number of times the letter *h* occurs in the text
-- `rel_freq_h`: relative frequency of the letter *hÄ in the text
+- `rel_freq_h`: relative frequency of the letter *h* in the text
 
 Features currently used by the classifier:
 - `count_ette`: the number of times the lexical item *ette* occurs in the text
