@@ -7,7 +7,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 ### 3. [Process flow](#process-flow)
 ### 4. [Output](#output)
 ### 5. [Additional resources](#additional-resources)
-### 6. [Lexical features used for rule-based Meänkieli/Finnish disambiguation](#lexical-features-used-for-meänkielifinnish-rule-based-disambiguation)
+### 6. [Lexical features used for rule-based Meänkieli/Finnish disambiguation](#lexical-features-used-for-rule-based-meänkielifinnish-disambiguation)
 
 ## Features
 
