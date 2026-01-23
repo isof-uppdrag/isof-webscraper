@@ -22,6 +22,11 @@ def fin_fit_disambiguation(text):
             "count_oon": 0,
             "count_mie": 0,
             "count_sie": 0,
+            "count_met": 0,
+            "count_tet": 0,
+            "count_het": 0,
+            "count_haan":0,
+            "count_jokka":0,
             "final_prediction": "fin",
         }
 
@@ -33,13 +38,18 @@ def fin_fit_disambiguation(text):
     rel_freq_h = count_h / length
 
     # Lexical markers for meänkieli
-    count_ette = text_lower.count(" ette ")
-    count_oon = text_lower.count(" oon ")
-    count_mie = text_lower.count(" mie ")
-    count_sie = text_lower.count(" sie ")
+    count_ette = (text_lower.count(" ette ") + text.count("Ette "))
+    count_oon = (text_lower.count(" oon ") + text.count("Oon "))
+    count_mie = (text_lower.count(" mie ") + text.count("Mie "))
+    count_sie = (text_lower.count(" sie ") + text.count("Sie "))
+    count_met = (text_lower.count(" met ") + text.count("Met "))
+    count_tet = (text_lower.count(" tet ") + text.count("Tet "))
+    count_het = (text_lower.count(" het ") + text.count("Het "))
+    count_haan = (text_lower.count(" hään ") + text.count("Hään "))
+    count_jokka = (text_lower.count(" jokka ") + text.count("Jokka "))
 
     # Rule used for decision
-    if any(x > 0 for x in (count_ette, count_oon, count_mie, count_sie)):  # Change this?
+    if any(x > 0 for x in (count_ette, count_oon, count_mie, count_sie, count_met, count_tet, count_het, count_haan, count_jokka)):  # Change this?
         final_prediction = "fit"   # Meänkieli
     else:
         final_prediction = "fin"   # Finnish
@@ -54,6 +64,11 @@ def fin_fit_disambiguation(text):
         "count_oon": count_oon,
         "count_mie": count_mie,
         "count_sie": count_sie,
+        "count_met": count_met,
+        "count_tet": count_tet,
+        "count_het": count_het,
+        "count_haan": count_haan,
+        "count_jokka": count_jokka,
         "final_prediction": final_prediction,
     }
 

@@ -34,7 +34,7 @@ LOG_FILE = os.path.join(OUTPUT_DIR, "crawler.log")  # Log file
 # Logging the crawling process
 #############
 
-log_file = open(LOG_FILE, "w", encoding="utf-8")
+log_file = open(LOG_FILE, "a", encoding="utf-8")
 log_lock = threading.Lock()
 
 def log(msg):
@@ -53,6 +53,7 @@ start_urls = []  # Starting point
 urlcat_lookup = {}  # Metadata for type of URL (kommun/region/myndighet/radio)
 allowed_domains = set()  # Making sure that only child links within the seed page are explored (no escpaing)
 robots_cache = {}  # For robots.txt
+seen_text_hashes = set()
 
 # Language related
 unique_lang_tags = set()
@@ -196,7 +197,8 @@ def extract_publish_date(soup):
         ("name", "DC.date"),
         ("name", "publish-date"),
         ("name", "publish_date"),
-        ("name", "created")
+        ("name", "created"),
+        ("name", "rek:pubdate")
     ]
 
     # Looking for pubdate tags
@@ -219,6 +221,24 @@ def extract_publish_date(soup):
             pass
     return None  # Failsafe (if no tags were found)
 
+def load_seen_hashes(output_path):
+    '''
+    Load previously seen text hashes from existing output file
+    '''
+    if not os.path.exists(output_path):
+        return set()
+    
+    seen = set()
+    with open(output_path, "r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                obj = json.loads(line)
+                if "text_uid" in obj:
+                    seen.add(obj["text_uid"])
+            except Exception:
+                continue
+    return seen
+
 #############
 # Page parser
 #############
@@ -234,6 +254,8 @@ def parse_page(html, url):
 
     title = soup.title.get_text(strip=True) if soup.title else ""
     text = clean_text(soup)
+
+    text_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
     # Strip text from title if text starts with title
     if title and text.startswith(title):
@@ -269,6 +291,11 @@ def parse_page(html, url):
         "count_oon": None,
         "count_mie": None,
         "count_sie": None,
+        "count_met": None,
+        "count_tet": None,
+        "count_het": None,
+        "count_haan": None,
+        "count_jokka": None
     }
 
     # Disambiguating Finnish and Meänkieli -- assuming that the off-the-shelf model predicted "fin" for both
@@ -331,7 +358,8 @@ def parse_page(html, url):
 
     # Output with metadata; links are not written to the output for smaller file size, only stored in the back-end
     return {
-        "uid": uid,
+        "page_uid": uid,  # unique identifier for page
+        "text_uid": text_hash,  # unique identifier for content (text)
         "url": url,
         "category": category,
         "lang-url-tag": lang_html or "unknown",
@@ -374,6 +402,12 @@ def crawl_one(url, outfile, seed_set, seeds_remaining):
 
     page_data, child_links = parse_page(r.text, url)
 
+    with state_lock:
+        if page_data["text_uid"] in seen_text_hashes:
+            log(f"Skipping duplicate content at {url}\n")
+            return child_links
+        seen_text_hashes.add(page_data["text_uid"])
+
     with file_lock:
         json.dump(page_data, outfile, ensure_ascii=False)
         outfile.write("\n")
@@ -398,7 +432,12 @@ def main():
     global FAST_MODEL_ALL, FAST_MODEL_FINFIT
     global DISAMBIGUATION_TYPE, fasttext_to_iso3
     global THREADING_ENABLED, seeds_processed
-    global LANG_PREDICTION_LEVEL    
+    global LANG_PREDICTION_LEVEL
+    global seen_text_hashes
+    global visited
+    
+    seen_text_hashes = load_seen_hashes(OUTPUT_FILE)
+    log(f"Loaded {len(seen_text_hashes)} previously seen texts")
 
     log("Starting crawler")
 
@@ -468,7 +507,7 @@ def main():
 
     visited = set()
 
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as outfile:
+    with open(OUTPUT_FILE, "a", encoding="utf-8") as outfile:  # -a flag for appending to output
 
         # Without threading
         if not THREADING_ENABLED:

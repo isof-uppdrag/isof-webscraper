@@ -7,6 +7,7 @@ This is a README file with instructions on how to use the crawler. Table of cont
 ### 3. [Process flow](#process-flow)
 ### 4. [Output](#output)
 ### 5. [Additional resources](#additional-resources)
+### 6. [Lexical features used for rule-based Meänkieli/Finnish disambiguation](#lexical-features-used-for-meänkielifinnish-rule-based-disambiguation)
 
 ## Features
 
@@ -73,18 +74,21 @@ When you start running the program, two files will be saved in the newly created
     - In case the `lang` tag in the scraped website's HTML code is an instance of `{"rmf", "rmn", "rmy", "rmu", "rom"}`, then `final_prediction` is overwritten to the ISO 639-3 code `rom`.
     - In case the `lang` tag in the scraped website's HTML codde is an instance of `{"smi", "smj", "sma", "sme", "se"}` or if the URL in question includes the string `samegi` (short for *samegiella*), then `final_prediction` is overwritten to the ISO 639-3 code `smi`.
 
+4. The crawler is tracking the visited pages and the scraped content to handle duplicates. The output files are written incrementally and whenever you run the program, new data is appended to the files.
+
 ## Output
 
 The scraped texts are stored in a JSON file in the `output` folder with the following metadata:
 
-- `uid`: a (hashed) unique identifer for the text
+- `page_uid`: a (hashed) unique identifer for the page
+- `text_uid`: a (hashed) unique identifier for the content (text)
 - `url`: the URL from which the text was scraped
 - `category`: type of website (e.g. kommun/region/myndighet/radio) -- in the current implementation the only website with the *radio* tag is *https://www.sverigesradio.se/meanraatio*
 - `lang-url-tag`: the language tag from the website's HTML code
 - `length`: length of the text in number of characters
 - `lang-fasttext-identified`: ISO 639-3 code predicted with the off-the-shelf model (not necessarily the final language tag)
 - `lang-fasttext-confidence`: prediction confidence of the off-the-shelf model [0-1]
-- A set of frequencies of various features used for rule-based Finnish/Meänkieli disambiguation (e.g. relative frequency of letter *d* and *h*, counts of Meänkieli-specific lexical items etc.) NB: only gets populated when `--disambiguation_type` is set to `rule`, otherwise `null` is written to all features. For more information about rules and for changing these, see `langclassifier.py` - the script from which the rule-based function is imported in the crawler.
+- A set of frequencies of various features used for rule-based Finnish/Meänkieli disambiguation (e.g. relative frequency of letter *d* and *h*, counts of Meänkieli-specific lexical items etc.) NB: only gets populated when `--disambiguation_type` is set to `rule`, otherwise `null` is written to all features. For more information about rules and for changing these, see `langclassifier.py` - the script from which the rule-based function is imported in the crawler. For more information about these features, see chapter **[Lexical features used for Meänkieli/Finnish rule-based disambiguation](#lexical-features-used-for-rule-based-meänkielifinnish-disambiguation)**
 - `lang_prediction_level`: the level at which the language prediction was done (document/sentence)
 - `sentence_lang_distribution`: the distribution of the identified languages on the sentence level for the whole document (text)
 - `final_prediction`: the final language tag in ISO 639-3 format
@@ -101,3 +105,32 @@ The scraped texts are stored in a JSON file in the `output` folder with the foll
 ## Additional resources
 
 In the folder *additional resources*, you can find a json file including all the unique `lang` tags that were found in the HTML code of the target websites. This can be useful for further langtech tasks.
+
+## Lexical features used for rule-based Meänkieli/Finnish disambiguation
+
+When the `--disambiguation-type` flag is set to `rule`, the crawler is using a function imported from `langclassifier.py` to classify Finnish and Meänkieli texts using a rule based on a set of differentiating features.
+
+Features not currently used by the classifier but could be interesting for future use cases:
+- `count_d`: the number of times the letter *d* occurs in the text
+- `rel_freq_d`: relative frequency of the letter *d* in the text
+- `count_h`: the number of times the letter *h* occurs in the text
+- `rel_freq_h`: relative frequency of the letter *hÄ in the text
+
+Features currently used by the classifier:
+- `count_ette`: the number of times the lexical item *ette* occurs in the text
+- `count_oon`: the number of times the lexical item *oon* occurs in the text
+- `count_mie`: the number of times the lexical item *mie* occurs in the text
+- `count_sie`: the number of times the lexical item *sie* occurs in the text
+- `count_met`: the number of times the lexical item *met* occurs in the text
+- `count_tet`: the number of times the lexical item *tet* occurs in the text
+- `count_het`: the number of times the lexical item *het* occurs in the text
+- `count_haan`: the number of times the lexical item *hään* occurs in the text
+- `count_jokka`: the number of times the lexical item *jokka* occurs in the text
+
+Then, the tag `fit` (Meänkieli) tag will be assigned as `final_prediction` when the below conditions are met:
+
+```
+if any(x > 0 for x in (count_ette, count_oon, count_mie, count_sie, count_met, count_tet, count_het, count_haan, count_jokka))
+````
+
+In a test of 89 Finnish and 67 Meänkieli texts, this rule gave an accuracy of 99,4 % but the rule can easily be changed in `langclassifier.py` if necessary.
