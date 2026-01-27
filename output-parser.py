@@ -4,8 +4,9 @@ from collections import defaultdict
 
 # This program sorts the scraped texts based on language into separate per-langauge json files
 
-INPUT_FILE = "scraped-corpus.json"
-OUTPUT_DIR = "corpora sorted by language"
+INPUT_FILE = os.path.join("output", "scraped-corpus.json")
+OUTPUT_DIR = os.path.join("output", "corpora sorted by language")
+
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
