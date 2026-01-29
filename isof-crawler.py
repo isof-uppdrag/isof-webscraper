@@ -8,7 +8,7 @@ import argparse
 import threading
 import re
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
@@ -38,7 +38,7 @@ log_file = open(LOG_FILE, "a", encoding="utf-8")
 log_lock = threading.Lock()
 
 def log(msg):
-    ts = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    ts = datetime.now().replace(microsecond=0).isoformat()  # Uses system local time
     full = f"[{ts}] {msg}"
     with log_lock:
         print(full)  # Print for user feedback
@@ -49,27 +49,57 @@ def log(msg):
 # Global variables
 #############
 
+# Crawl related
 start_urls = []  # Starting point
 urlcat_lookup = {}  # Metadata for type of URL (kommun/region/myndighet/radio)
 allowed_domains = set()  # Making sure that only child links within the seed page are explored (no escpaing)
 robots_cache = {}  # For robots.txt
 seen_text_hashes = set()
+visited = set()
+seeds_done = set()
+seeds_processed = False
 
 # Language related
 unique_lang_tags = set()
 lang_counts = {}
 
-visited = set()
-
+# Threading related
 state_lock = threading.Lock()  # Only one thread is allowed to change shared memory at a time
 file_lock = threading.Lock()  # Only one thread is allowed to write to output file at a time
 
-seeds_done = set()
-seeds_processed = False
+#############
+# Coverage tracking
+#############
+
+crawl_stats = {
+    "discovered": set(),
+    "crawled": set(),
+    "failed": {}
+}
 
 #############
 # Helper functions
 #############
+
+def normalize_netloc(netloc):
+    '''
+    Helps with avoiding potential duplicate visits
+    '''
+    return netloc.lower().lstrip("www.")
+
+def classify_failure(exc):
+    '''
+    Categorizing web request failures - can be useful for debugging
+    '''
+    if isinstance(exc, requests.exceptions.ConnectTimeout):
+        return "connect_timeout"
+    if isinstance(exc, requests.exceptions.ReadTimeout):
+        return "read_timeout"
+    if isinstance(exc, requests.exceptions.SSLError):
+        return "ssl_error"
+    if isinstance(exc, requests.exceptions.ConnectionError):
+        return "connection_error"
+    return "request_error"
 
 def fasttext_predict(model, text):
     '''
@@ -98,12 +128,13 @@ def predict_language_sentence_level(text, model):
     for sent in sentences:
         if len(sent.strip()) < 10:
             continue  # Skip very short sentences (fewer than 10 chars)
-
         try:
             lang, conf = fasttext_predict(model, sent)
             iso_lang = to_iso3(lang)
+
             predictions.append(iso_lang)
             confidences.append(conf)
+
         except Exception:
             continue
 
@@ -116,7 +147,6 @@ def predict_language_sentence_level(text, model):
 
     return final_lang, avg_conf, dict(counts)
 
-
 def to_iso3(lang_code):
     '''
     Normalize Fasttext predicted language code to ISO 639-3.
@@ -124,8 +154,10 @@ def to_iso3(lang_code):
     '''
     return fasttext_to_iso3.get(lang_code, lang_code)
 
-# Making sure only allowed content is scraped
 def load_robots(netloc, scheme):
+    '''
+    Get robots.txt from target website
+    '''
     robots_url = f"{scheme}://{netloc}/robots.txt"
     try:
         r = requests.get(
@@ -146,20 +178,20 @@ def load_robots(netloc, scheme):
         log(f"Could not fetch robots.txt from {robots_url}: {e}")
         return None
 
-# Is scraping allowed as per robots.txt or not
+# <scheme>://<netloc>/<path>;<params>?<query>#<fragment>
 def is_allowed(url, user_agent="*"):
     '''
-    <scheme>://<netloc>/<path>;<params>?<query>#<fragment>
+    Checks whether specific URL is allowed to crawl as per robots.txt
     '''
     parsed = urlparse(url)
-    netloc = parsed.netloc  # Netloc = website + domain
+    netloc = normalize_netloc(parsed.netloc)
     scheme = parsed.scheme  # Scheme = http/https
 
     if netloc not in robots_cache:
         robots_cache[netloc] = load_robots(netloc, scheme)
     rp = robots_cache.get(netloc)
 
-    return True if rp is None else rp.can_fetch(user_agent, url)
+    return True if rp is None else rp.can_fetch(user_agent, url)  # Disclaimer: if robots.txt is not available, site is still crawled -- change to False to change behaviour
 
 def make_unique_id(category, url):
     '''
@@ -175,15 +207,50 @@ def clean_text(soup):
     '''
     Cleans texts from noisy/redundant data.
     '''
-    for tag in soup(["nav", "header", "footer", "script", "style", "img"]):
+    for tag in soup(["nav", "header", "footer", "script", "style", "img"]):  # Can be extended with other HTML tags if needed
         tag.decompose()
+    for a in soup.find_all("a", href=True):
+        if a ["href"].lower().endswith((".pdf", ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3")):
+            a.decompose()
     text = soup.get_text(separator=" ", strip=True)
 
     return " ".join(text.split())
 
-def extract_publish_date(soup):
+def extract_date_from_url(url):
     '''
-    Attempts to extract publish date for metadata.
+    Extract date from URL patterns like:
+    /YYYY/MM/DD/
+    /YYYY-MM-DD/
+    /YYYY/MM/
+    Returns a date string or None
+    '''
+
+    patterns = [
+        r"/(20\d{2})[/-](\d{2})[/-](\d{2})/",  # /2026/01/27/ or /2026-01-27/
+        r"/(20\d{2})[/-](\d{2})/"  # /2026/01
+    ]
+
+    for pattern in patterns:
+        m = re.search(pattern, url)
+        if not m:
+            continue
+
+        try:
+            year = int(m.group(1))
+            month = int(m.group(2))
+            day = int(m.group(3)) if len (m.groups()) == 3 else 1
+
+            dt = datetime(year, month, day, tzinfo=timezone.utc)
+            return dt.date().isoformat()
+        
+        except Exception:
+            continue
+    
+    return None
+
+def extract_publish_date(soup, url):
+    '''
+    Attempts to extract publish date and its source
     '''
 
     # Common meta tags for publish date extraction from HTML, possible to add new ones in the list if necessary
@@ -201,13 +268,13 @@ def extract_publish_date(soup):
         ("name", "rek:pubdate")
     ]
 
-    # Looking for pubdate tags
+    # Metadata-based publish date extraction
     for attribute, value in meta_properties:
         tag = soup.find("meta", attrs={attribute: value})
         if tag and tag.get("content"):
             try:
                 dt = datetime.fromisoformat(tag["content"].replace("Z", "+00:00"))
-                return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat()
+                return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat(), "metadata"
             except Exception:
                 pass
 
@@ -216,10 +283,16 @@ def extract_publish_date(soup):
     if time_tag:
         try:
             dt = datetime.fromisoformat(time_tag["datetime"].replace("Z", "+00:00"))
-            return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat()
+            return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat(), "metadata"
         except Exception:
             pass
-    return None  # Failsafe (if no tags were found)
+
+    # URL-based date extraction
+    url_date = extract_date_from_url(url)
+    if url_date:
+        return url_date, "url_pattern"
+
+    return None, None  # Failsafe (if no tags were found)
 
 def load_seen_hashes(output_path):
     '''
@@ -246,7 +319,7 @@ def load_seen_hashes(output_path):
 def parse_page(html, url):
     soup = BeautifulSoup(html, "html.parser")
 
-    published = extract_publish_date(soup)  # Extract publish date 
+    published, published_source = extract_publish_date(soup, url)  # Extract publish date 
 
     # Extracting lang code from HTML code
     html_tag = soup.find("html")
@@ -254,6 +327,17 @@ def parse_page(html, url):
 
     title = soup.title.get_text(strip=True) if soup.title else ""
     text = clean_text(soup)
+
+    # Storing (internal) child links to add to queue later
+    links = []
+    for a in soup.find_all("a", href=True):
+        link = urljoin(url, a["href"]).split("#")[0]
+        if urlparse(link).netloc in allowed_domains:
+            links.append(link)
+    
+    # Empty/non-text or too short
+    if len(text) < 10:
+        return None, links
 
     text_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -342,19 +426,11 @@ def parse_page(html, url):
 
         log(f"Languages seen so far: {sorted(unique_lang_tags)}")
         log(f"Counts per language: {lang_counts}")
-        print()
 
     # Metadata
     timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     category = urlcat_lookup.get(url)
     uid = make_unique_id(category, url)
-
-    # Storing (internal) child links to add to queue later
-    links = []
-    for a in soup.find_all("a", href=True):
-        link = urljoin(url, a["href"]).split("#")[0]
-        if urlparse(link).netloc in allowed_domains:
-            links.append(link)
 
     # Output with metadata; links are not written to the output for smaller file size, only stored in the back-end
     return {
@@ -373,6 +449,7 @@ def parse_page(html, url):
         "classification_type": classification_type,
         "crawl_timestamp": timestamp,
         "published": published,
+        "published_source": published_source,
         "title": title,
         "text": text
     }, links
@@ -381,8 +458,11 @@ def parse_page(html, url):
 # Worker (threaded)
 #############
 
-def crawl_one(url, outfile, seed_set, seeds_remaining):
+def crawl_one(url, outfile, seed_set):
     global seeds_processed
+
+    netloc_norm = normalize_netloc(urlparse(url).netloc)
+    crawl_stats["discovered"].add(url)
 
     if not is_allowed(url, "Mozilla/5.0"):
         log(f"Skipping {url} due to robots.txt")
@@ -390,21 +470,34 @@ def crawl_one(url, outfile, seed_set, seeds_remaining):
     try:
         r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
         if r.status_code != 200:
+            log(f"Failed to crawl {url}: HTTP {r.status_code}")
+            crawl_stats["failed"][url] = f"HTTP {r.status_code}"
             return []
-    except requests.exceptions.SSLError as ssl_err:
-        log(f"SSL error while crawling {url}: {ssl_err}")
-        return []
     except requests.exceptions.RequestException as e:
-        log(f"Failed to crawl {url}: {e}")
+        failure_type = classify_failure(e)
+        log(f"Failed to crawl {url}: {e} ({failure_type})")
+        crawl_stats["failed"][url] = failure_type
         return []
 
+    # Feedback
     log(f"Crawling {url}")
+    crawl_stats["crawled"].add(url)
 
-    page_data, child_links = parse_page(r.text, url)
+    result = parse_page(r.text, url)
+    
+    # If no text (len < 10 chars)
+    if result is None:  # Nothing usable on website
+        log(f"Skipping {url} as no proper text was identified")
+        return []
+    
+    page_data, child_links = result
+
+    if page_data is None:  # In case a child link can be visited later from a skipped page
+        return child_links
 
     with state_lock:
         if page_data["text_uid"] in seen_text_hashes:
-            log(f"Skipping duplicate content at {url}\n")
+            log(f"Skipping duplicate content at {url}")
             return child_links
         seen_text_hashes.add(page_data["text_uid"])
 
@@ -429,12 +522,7 @@ def crawl_one(url, outfile, seed_set, seeds_remaining):
 #############
 
 def main():
-    global FAST_MODEL_ALL, FAST_MODEL_FINFIT
-    global DISAMBIGUATION_TYPE, fasttext_to_iso3
-    global THREADING_ENABLED, seeds_processed
-    global LANG_PREDICTION_LEVEL
-    global seen_text_hashes
-    global visited
+    global FAST_MODEL_ALL, FAST_MODEL_FINFIT, DISAMBIGUATION_TYPE, fasttext_to_iso3, THREADING_ENABLED, seeds_processed, LANG_PREDICTION_LEVEL, seen_text_hashes, visited
     
     seen_text_hashes = load_seen_hashes(OUTPUT_FILE)
     log(f"Loaded {len(seen_text_hashes)} previously seen texts")
@@ -461,10 +549,9 @@ def main():
 
     # User feedback for missing argument
     if args.disambiguation_type == "model" and not args.finfit_model:
-        parser.error("--finfitmodel is required when --disambiguation-type=model")
+        parser.error("--finfit_model is required when --disambiguation-type=model")
 
     DISAMBIGUATION_TYPE = args.disambiguation_type
-    #FAST_MODEL_ALL = fasttext.load_model(args.fast_model_all)
     LANG_PREDICTION_LEVEL = args.lang_level
     FAST_MODEL_ALL = fasttext.load_model(os.path.join(BASE_DIR, "models", "lid.176.ftz"))
     FAST_MODEL_FINFIT = None
@@ -493,16 +580,16 @@ def main():
                 continue
             parsed = urlparse(url)
             if not parsed.scheme:
-                url = "http://" + url
+                url = "https://" + url
             start_urls.append(url)
             urlcat_lookup[url] = urlcat
             allowed_domains.add(urlparse(url).netloc)
 
+    # Previous solution
     start_urls[:] = list(set(start_urls))
     log(f"Loaded {len(start_urls)} seed URLs")
 
     seed_set = set(start_urls)
-    seeds_remaining = set(start_urls)
     seeds_processed = False
 
     visited = set()
@@ -512,40 +599,44 @@ def main():
         # Without threading
         if not THREADING_ENABLED:
             log(f"Crawler running with no threading")
+
             queue = deque(start_urls)
+
+            # Assign URL from queue
             while queue:
-                url = queue.popleft()  # Assign URL from queue
-
-                if not seeds_processed and all(s in visited for s in seed_set):
-                    seeds_processed = True
-                    log("*** All seed URLs processed; now crawling child links ***")
-
+                url = queue.popleft()  
                 if url in visited:
                     continue
 
                 visited.add(url)
 
-                child_links = crawl_one(url, outfile, seed_set, seeds_remaining)
+                child_links = crawl_one(url, outfile, seed_set)
+
                 for link in child_links:
                     if link not in visited:
-                        urlcat_lookup[link] = urlcat_lookup.get(url)
+                        urlcat_lookup[link] = urlcat_lookup.get(url)  # For metadata
                         queue.append(link)
-
-                #log(f"Queue length: {len(queue)}")
-                #log("")
 
         # With threading
         else:
             log(f"Threading enabled with {args.max_workers} workers")
             with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
-                futures = {executor.submit(crawl_one, url, outfile, seed_set, seeds_remaining): url for url in start_urls}
 
-                for future in as_completed(futures):
-                    child_links = future.result()
-                    for link in child_links:
-                        if link not in visited:
-                            visited.add(link)
-                            executor.submit(crawl_one, link, outfile, seed_set, seeds_remaining)
+                # Submitting initial URLs
+                futures = {executor.submit(crawl_one, url, outfile, seed_set): url for url in start_urls}
+
+                while futures:
+                    done, _ = wait(futures, return_when=FIRST_COMPLETED)  # Wait for threads to complete
+                    for future in done:
+                        parent_url = futures.pop(future)
+                        child_links = future.result()
+
+                        # Submitting child links for crawling
+                        for link in child_links:
+                            if link not in visited:
+                                visited.add(link)
+                                urlcat_lookup[link] = urlcat_lookup.get(parent_url)  # Ensuring that the "category" field in the metadata gets populated correctly
+                                futures[executor.submit(crawl_one, link, outfile, seed_set)] = link
 
     log("Crawl finished")
     log_file.close()

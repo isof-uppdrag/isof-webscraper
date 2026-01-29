@@ -95,6 +95,7 @@ The scraped texts are stored in a JSON file in the `output` folder with the foll
 - `classification_type`: information about how the final prediction was done (e.g. *Fasttext off-the-shelf/Rule-based/Fasttext trained disambiguator model/HTML overwrite*)
 - `crawl_timestamp`: the timestamp at which the crawler exported the text
 - `published`: the publication date of the text (*null* when not available)
+- `published_source`: from where the publication date was extracted (e.g. metadata/url_pattern)
 - `title`: the title of the scraped text
 - `text`: the actual text
 
