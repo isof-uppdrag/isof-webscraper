@@ -209,9 +209,22 @@ def clean_text(soup):
     '''
     for tag in soup(["nav", "header", "footer", "script", "style", "img"]):  # Can be extended with other HTML tags if needed
         tag.decompose()
+
     for a in soup.find_all("a", href=True):
-        if a ["href"].lower().endswith((".pdf", ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3")):
+
+        href = a.get("href")
+
+        if not isinstance(href, str):  # Ensure that href is a string
+            continue
+
+        href = href.strip()
+
+        if not href:  # Previously crashed if href was None, this should fix it
+            continue
+
+        if href.lower().endswith((".pdf", ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mp3")):
             a.decompose()
+
     text = soup.get_text(separator=" ", strip=True)
 
     return " ".join(text.split())
